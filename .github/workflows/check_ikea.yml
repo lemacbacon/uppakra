@@ -1,0 +1,26 @@
+name: Check IKEA Uppåkra Availability
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Daily at 10am Paris time (UTC+2 in summer)
+  workflow_dispatch:      # Allow manual runs from the GitHub UI
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.actor == 'lemacbacon'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check availability
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python check_availability.py
